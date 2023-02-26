@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <algorithm>
+#include <map>
 //using namespace std;
 std::string ConverttoBinary(std::string line);
 std::string addLeadingZeroes(std::string binaryStr);
@@ -13,6 +13,7 @@ int main() {
     //std::ifstream inputFile(FileName); // open file for reading
     std::ifstream inputFile("test_case2.obj");
     std::string line;
+    std::string RTYPE = "000000";
     
 
     if (inputFile.is_open()) {
@@ -23,7 +24,7 @@ int main() {
             std::cout << "Converted binary value: " << BINARY << std::endl;
             std::string OPCODE = BINARY.substr(0, 6);
             std::cout << "opcode: " << OPCODE << std::endl;
-            if(OPCODE == "000000") {
+            if(OPCODE == RTYPE) {
                  std::cout << "R TYPE" << std::endl;
                  std::string RS = BINARY.substr(6, 5);
                  std::cout << "RS " << RS << std::endl;
@@ -35,6 +36,18 @@ int main() {
                  std::cout << "SHAMT " << SHAMT << std::endl;
                  std::string FUNCT = BINARY.substr(26, 6);
                  std::cout << "FUNCT " << FUNCT << std::endl;
+    
+
+            }
+            else {
+                 std::cout << "I TYPE" << std::endl;
+                 std::string RS = BINARY.substr(6, 5);
+                 std::cout << "RS " << RS << std::endl;
+                 std::string RT = BINARY.substr(11, 5);
+                 std::cout << "RT " << RT << std::endl;
+                 std::string IMM = BINARY.substr(16, 16);
+                 std::cout << "IMM " << IMM << std::endl;
+                 
             }
         }
         inputFile.close(); // close file
@@ -66,3 +79,18 @@ std::string addLeadingZeroes(std::string binaryStr) {
     std::string leadingZeroes(numZeroes, '0');  // Create a string of zeroes, with the number of zeroes needed
     return leadingZeroes + binaryStr;  // Concatenate the two strings   
 }
+
+std::map<std::string, int> R_OPCODES = { //map opcode, funct
+      {"add", 100000},
+      {"addu", 100001},
+      {"and", 100100},
+      {"jr", 001000},
+      {"nor", 100111},
+      {"or", 100101},
+      {"slt", 101010},
+      {"sltu", 101011},
+      {"sll", 000000},
+      {"srl", 000010},
+      {"sub", 100010},
+      {"subu", 100011},
+};
