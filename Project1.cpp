@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <algorithm>
 //using namespace std;
 std::string ConverttoBinary(std::string line);
 std::string addLeadingZeroes(std::string binaryStr);
@@ -12,6 +13,7 @@ int main() {
     //std::ifstream inputFile(FileName); // open file for reading
     std::ifstream inputFile("test_case2.obj");
     std::string line;
+    
 
     if (inputFile.is_open()) {
         while (std::getline(inputFile, line)) { // read line by line
@@ -19,10 +21,25 @@ int main() {
             std::string BINARY; //std::string FINISH_HEX;
             BINARY = ConverttoBinary(line);
             std::cout << "Converted binary value: " << BINARY << std::endl;
+            std::string OPCODE = BINARY.substr(0, 6);
+            std::cout << "opcode: " << OPCODE << std::endl;
+            if(OPCODE == "000000") {
+                 std::cout << "R TYPE" << std::endl;
+                 std::string RS = BINARY.substr(6, 5);
+                 std::cout << "RS " << RS << std::endl;
+                 std::string RT = BINARY.substr(11, 5);
+                 std::cout << "RT " << RT << std::endl;
+                 std::string RD = BINARY.substr(16, 5);
+                 std::cout << "RD " << RD << std::endl;
+                 std::string SHAMT = BINARY.substr(21, 5);
+                 std::cout << "SHAMT " << SHAMT << std::endl;
+                 std::string FUNCT = BINARY.substr(26, 6);
+                 std::cout << "FUNCT " << FUNCT << std::endl;
+            }
         }
         inputFile.close(); // close file
     }
-    else {
+    else { 
         std::cout << "Error opening file." << std::endl;
     }
     return 0;
