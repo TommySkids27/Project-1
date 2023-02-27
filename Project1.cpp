@@ -40,13 +40,21 @@ int main() {
                  //std::cout << "FUNCT " << FUNCT << std::endl;
                  std::string MNEM = getInstructionName(BINARY.substr(26, 6), R_OPCODES);
                  //std::cout << "MNEM " << MNEM << std::endl;
-                 std::string RS = getInstructionName(BINARY.substr(6, 5), REGISTERS);
+                // std::string RS = getInstructionName(BINARY.substr(6, 5), REGISTERS);
                 // std::cout << "RS " << RS << std::endl;
                  std::string RT = getInstructionName(BINARY.substr(11, 5), REGISTERS);
                  //std::cout << "RT " << RT << std::endl;
                  std::string RD = getInstructionName(BINARY.substr(16, 5), REGISTERS);
                 // std::cout << "RD " << RD << std::endl;
-                 std::string SHAMT = BINARY.substr(21, 5);
+                std::string SHAMT; std::string RS;
+                if (MNEM == "srl" || MNEM == "sll") {
+                     SHAMT = BINARY.substr(21, 5);
+                     RS = "\b"; //backpace character for proper spacing
+                }
+                else {
+                     SHAMT = "";
+                     RS = getInstructionName(BINARY.substr(6, 5), REGISTERS);
+                }
                 // std::cout << "SHAMT " << SHAMT << std::endl;
                  std::string R_INSTRUCTION = MNEM + " " + RD + " " + RS + " " + RT + " " + SHAMT;
                  std::cout << R_INSTRUCTION << std::endl; 
@@ -61,6 +69,8 @@ int main() {
                  //std::cout << "RT " << RT << std::endl;
                  std::string IMM = BINARY.substr(16, 16);
                  //std::cout << "IMM " << IMM << std::endl;
+                 std::string I_INSTRUCTION = MNEM + " " + RD + " " + RS + " " + RT + " " + SHAMT;
+                 std::cout << R_INSTRUCTION << std::endl; 
                  
             }
         }
@@ -96,7 +106,7 @@ std::string addLeadingZeroes(std::string binaryStr) {
 
 std::string getInstructionName(std::string opcodeStr, std::map<std::string, std::string> MAP) {
     
-    std::cout << "opcodeStr" << opcodeStr << std::endl;
+    //std::cout << "opcodeStr" << opcodeStr << std::endl;
     // Iterate over the map and look for the opcode
     std::map<std::string, std::string>::iterator it;
     for (it = MAP.begin(); it != MAP.end(); ++it) {
