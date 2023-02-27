@@ -63,14 +63,17 @@ int main() {
             }
             else {
                  std::cout << "I TYPE" << std::endl;
-                 std::string RS = BINARY.substr(6, 5);
+                std::string OP = getInstructionName(OPCODE, I_OPCODES);
+                 //std::string RS = BINARY.substr(6, 5);
+                 std::string RS = getInstructionName(BINARY.substr(6, 5), REGISTERS);
                  //std::cout << "RS " << RS << std::endl;
-                 std::string RT = BINARY.substr(11, 5);
+                 //std::string RT = BINARY.substr(11, 5);
+                 std::string RT = getInstructionName(BINARY.substr(11, 5), REGISTERS);
                  //std::cout << "RT " << RT << std::endl;
                  std::string IMM = BINARY.substr(16, 16);
                  //std::cout << "IMM " << IMM << std::endl;
-                 std::string I_INSTRUCTION = MNEM + " " + RD + " " + RS + " " + RT + " " + SHAMT;
-                 std::cout << R_INSTRUCTION << std::endl; 
+                 std::string I_INSTRUCTION = OP + " " + RS + " " + RT + " " + IMM;
+                 std::cout << I_INSTRUCTION << std::endl; 
                  
             }
         }

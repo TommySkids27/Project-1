@@ -15,7 +15,23 @@ std::map<std::string, std::string> R_OPCODES = { //map opcode, funct
       {"sub", "100010"},
       {"subu", "100011"},
 };
-
+std::map<std::string, std::string> I_OPCODES = { //map opcode, funct
+      {"addi", "001000"},
+      {"addiu", "001001"},
+      {"andi", "001100"},
+      {"beq", "000100"},
+      {"bne", "000101"},
+      {"lbu", "100100"},
+      {"lhu", "100101"},
+      {"ll", "110000"},
+      {"lw", "100011"},
+      {"slti", "001010"},
+      {"sltiu", "001011"},
+      {"sb", "101000"},
+      {"sc", "111000"},
+      {"sh", "101001"},
+      {"sw", "101011"},
+};
 std::map<std::string, std::string> REGISTERS = {
     {"$zero", "00000"},
     {"$at", "00001"},
