@@ -2,9 +2,11 @@
 #include <fstream>
 #include <string>
 #include <map>
+#include "Project1.hpp"
 //using namespace std;
 std::string ConverttoBinary(std::string line);
 std::string addLeadingZeroes(std::string binaryStr);
+std::string getInstructionName(std::string opcodeStr);
 
 int main() {
     //std::string FileName;
@@ -15,38 +17,40 @@ int main() {
     std::string line;
     std::string RTYPE = "000000";
     
-
+    std::cout << "S T A R T >>>>>>>>>>>> " << std::endl; // print line
     if (inputFile.is_open()) {
         while (std::getline(inputFile, line)) { // read line by line
-           std::cout << "FILELINE " << line << std::endl; // print line
+           //std::cout << "FILELINE " << line << std::endl; // print line
             std::string BINARY; //std::string FINISH_HEX;
             BINARY = ConverttoBinary(line);
-            std::cout << "Converted binary value: " << BINARY << std::endl;
+           // std::cout << "Converted binary value: " << BINARY << std::endl;
             std::string OPCODE = BINARY.substr(0, 6);
             std::cout << "opcode: " << OPCODE << std::endl;
             if(OPCODE == RTYPE) {
                  std::cout << "R TYPE" << std::endl;
                  std::string RS = BINARY.substr(6, 5);
-                 std::cout << "RS " << RS << std::endl;
+                 //std::cout << "RS " << RS << std::endl;
                  std::string RT = BINARY.substr(11, 5);
-                 std::cout << "RT " << RT << std::endl;
+                 //std::cout << "RT " << RT << std::endl;
                  std::string RD = BINARY.substr(16, 5);
-                 std::cout << "RD " << RD << std::endl;
+                 //std::cout << "RD " << RD << std::endl;
                  std::string SHAMT = BINARY.substr(21, 5);
-                 std::cout << "SHAMT " << SHAMT << std::endl;
+                 //std::cout << "SHAMT " << SHAMT << std::endl;
                  std::string FUNCT = BINARY.substr(26, 6);
                  std::cout << "FUNCT " << FUNCT << std::endl;
-    
+                 std::string MNEM = getInstructionName(FUNCT);
+                 std::cout << "MNEM " << MNEM << std::endl;
+
 
             }
             else {
                  std::cout << "I TYPE" << std::endl;
                  std::string RS = BINARY.substr(6, 5);
-                 std::cout << "RS " << RS << std::endl;
+                 //std::cout << "RS " << RS << std::endl;
                  std::string RT = BINARY.substr(11, 5);
-                 std::cout << "RT " << RT << std::endl;
+                 //std::cout << "RT " << RT << std::endl;
                  std::string IMM = BINARY.substr(16, 16);
-                 std::cout << "IMM " << IMM << std::endl;
+                 //std::cout << "IMM " << IMM << std::endl;
                  
             }
         }
@@ -63,7 +67,7 @@ std::string ConverttoBinary(std::string line) {
     std::string binaryString = ""; //declare empty string 
     uint64_t DecValue = std::stoull(line, nullptr, 16); // convert the string (the hex value) into a unsigned 64 bit integer (decimal)
     //note uint64_t was used to handle large hex values that would overflow an int 
-    std::cout << "Dec value " << DecValue << std::endl;
+      //std::cout << "Dec value " << DecValue << std::endl;
     for (std::size_t i = 0; DecValue > 0; i++) {
         binaryString = std::to_string(DecValue % 2) + binaryString; //converts DecValue into string and appends the binary string
         DecValue /= 2; //convert decimal value in string into a binary value
@@ -80,17 +84,21 @@ std::string addLeadingZeroes(std::string binaryStr) {
     return leadingZeroes + binaryStr;  // Concatenate the two strings   
 }
 
-std::map<std::string, int> R_OPCODES = { //map opcode, funct
-      {"add", 100000},
-      {"addu", 100001},
-      {"and", 100100},
-      {"jr", 001000},
-      {"nor", 100111},
-      {"or", 100101},
-      {"slt", 101010},
-      {"sltu", 101011},
-      {"sll", 000000},
-      {"srl", 000010},
-      {"sub", 100010},
-      {"subu", 100011},
-};
+std::string getInstructionName(std::string opcodeStr) {
+    
+    //std::cout << "OP" << opcodeStr << std::endl;
+    // Iterate over the map and look for the opcode
+    std::map<std::string, std::string>::iterator it;
+    for (it = R_OPCODES.begin(); it != R_OPCODES.end(); ++it) {
+    //std::cout << it->first << ": " << it->second << std::endl;
+    if (it->second == opcodeStr) {
+        // Opcode found, return the instruction name
+        //std::cout << "f u n c t !: " << it->first << std::endl;
+        return it->first;
+    }
+}
+    // Opcode not found, print the opcode and return an empty string
+    std::cout << "Opcode not found: " << opcodeStr << std::endl;
+    return "";
+
+}
