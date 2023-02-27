@@ -25,6 +25,7 @@ std::map<std::string, std::string> I_OPCODES = { //map opcode, funct
       {"lhu", "100101"},
       {"ll", "110000"},
       {"lw", "100011"},
+      {"ori", "001101"},
       {"slti", "001010"},
       {"sltiu", "001011"},
       {"sb", "101000"},
