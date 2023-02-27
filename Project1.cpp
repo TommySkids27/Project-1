@@ -6,8 +6,8 @@
 //using namespace std;
 std::string ConverttoBinary(std::string line);
 std::string addLeadingZeroes(std::string binaryStr);
-std::string getInstructionName(std::string opcodeStr);
-
+//std::string getInstructionName(std::string opcodeStr);
+std::string getInstructionName(std::string opcodeStr, std::map<std::string, std::string> MAP);
 int main() {
     //std::string FileName;
     //std::cout << "Enter file name with suffix: " << std::endl;
@@ -28,18 +28,28 @@ int main() {
             std::cout << "opcode: " << OPCODE << std::endl;
             if(OPCODE == RTYPE) {
                  std::cout << "R TYPE" << std::endl;
-                 std::string RS = BINARY.substr(6, 5);
+                 //std::string RS = BINARY.substr(6, 5);
                  //std::cout << "RS " << RS << std::endl;
-                 std::string RT = BINARY.substr(11, 5);
+                 //std::string RT = BINARY.substr(11, 5);
                  //std::cout << "RT " << RT << std::endl;
-                 std::string RD = BINARY.substr(16, 5);
+                 //std::string RD = BINARY.substr(16, 5);
                  //std::cout << "RD " << RD << std::endl;
-                 std::string SHAMT = BINARY.substr(21, 5);
+                 //std::string SHAMT = BINARY.substr(21, 5);
                  //std::cout << "SHAMT " << SHAMT << std::endl;
-                 std::string FUNCT = BINARY.substr(26, 6);
-                 std::cout << "FUNCT " << FUNCT << std::endl;
-                 std::string MNEM = getInstructionName(FUNCT);
-                 std::cout << "MNEM " << MNEM << std::endl;
+                 //std::string FUNCT = BINARY.substr(26, 6);
+                 //std::cout << "FUNCT " << FUNCT << std::endl;
+                 std::string MNEM = getInstructionName(BINARY.substr(26, 6), R_OPCODES);
+                 //std::cout << "MNEM " << MNEM << std::endl;
+                 std::string RS = getInstructionName(BINARY.substr(6, 5), REGISTERS);
+                // std::cout << "RS " << RS << std::endl;
+                 std::string RT = getInstructionName(BINARY.substr(11, 5), REGISTERS);
+                 //std::cout << "RT " << RT << std::endl;
+                 std::string RD = getInstructionName(BINARY.substr(16, 5), REGISTERS);
+                // std::cout << "RD " << RD << std::endl;
+                 std::string SHAMT = BINARY.substr(21, 5);
+                // std::cout << "SHAMT " << SHAMT << std::endl;
+                 std::string R_INSTRUCTION = MNEM + " " + RD + " " + RS + " " + RT + " " + SHAMT;
+                 std::cout << R_INSTRUCTION << std::endl; 
 
 
             }
@@ -84,12 +94,12 @@ std::string addLeadingZeroes(std::string binaryStr) {
     return leadingZeroes + binaryStr;  // Concatenate the two strings   
 }
 
-std::string getInstructionName(std::string opcodeStr) {
+std::string getInstructionName(std::string opcodeStr, std::map<std::string, std::string> MAP) {
     
-    //std::cout << "OP" << opcodeStr << std::endl;
+    std::cout << "opcodeStr" << opcodeStr << std::endl;
     // Iterate over the map and look for the opcode
     std::map<std::string, std::string>::iterator it;
-    for (it = R_OPCODES.begin(); it != R_OPCODES.end(); ++it) {
+    for (it = MAP.begin(); it != MAP.end(); ++it) {
     //std::cout << it->first << ": " << it->second << std::endl;
     if (it->second == opcodeStr) {
         // Opcode found, return the instruction name
@@ -98,7 +108,7 @@ std::string getInstructionName(std::string opcodeStr) {
     }
 }
     // Opcode not found, print the opcode and return an empty string
-    std::cout << "Opcode not found: " << opcodeStr << std::endl;
+    std::cout << "String not found: " << opcodeStr << std::endl;
     return "";
 
 }
