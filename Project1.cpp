@@ -1,21 +1,50 @@
 #include <iostream>
 #include <fstream>
+#include <bitset>
 #include "Project1.hpp"
-//using namespace std;
+
 std::string ConverttoBinary(std::string line);
 std::string addLeadingZeroes(std::string binaryStr);
-//std::string FIND_IN_MAP(std::string opcodeStr);
 std::string FIND_IN_MAP(std::string opcodeStr, std::map<std::string, std::string> MAP);
+std::string twosCompliment(std::string binaryStr);
 int main() {
     //std::string FileName;
     //std::cout << "Enter file name with suffix: " << std::endl;
     //std::cin >> FileName;
     //std::ifstream inputFile(FileName); // open file for reading
-    std::ifstream inputFile("test_case2.obj");
+    std::ifstream inputFile("test_case3.obj");
+    std::ofstream outfile("proj1_skidmore.asm", std::ios::trunc);
     std::string line;
     std::string RTYPE = "000000";
-    
-    std::cout << "S T A R T >>>>>>>>>>>> " << std::endl; // print line
+    int address = 0;
+
+
+    std::map<int, std::string> labels;
+     if (inputFile.is_open()) {
+        while (std::getline(inputFile, line)) { // read line by line
+        std::string BINARY; //std::string FINISH_HEX;
+        BINARY = ConverttoBinary(line);
+        std::string OPCODE = BINARY.substr(0, 6);
+        if (OPCODE == "000100" || OPCODE == "000101"){
+            std::string IMM = BINARY.substr(16, 16);
+            std::string B_OFFSET;
+            if(IMM[0] == '1') {
+                B_OFFSET = "-" + twosCompliment(IMM);
+            }
+            else {
+                std::bitset<16> bitset(IMM);
+                int decimalValue = bitset.to_ulong();
+                B_OFFSET = std::to_string(decimalValue);
+            }
+            std::cout << " h hi di: " << B_OFFSET << std::endl;
+        }
+        
+        } inputFile.close();
+    }
+
+
+
+    inputFile.open("test_case3.obj");
     if (inputFile.is_open()) {
         while (std::getline(inputFile, line)) { // read line by line
            //std::cout << "FILELINE " << line << std::endl; // print line
@@ -23,59 +52,68 @@ int main() {
             BINARY = ConverttoBinary(line);
            // std::cout << "Converted binary value: " << BINARY << std::endl;
             std::string OPCODE = BINARY.substr(0, 6);
+            std::string INSTRUCTION;
             std::cout << "opcode: " << OPCODE << std::endl;
             if(OPCODE == RTYPE) {
                  std::cout << "R TYPE" << std::endl;
-                 //std::string RS = BINARY.substr(6, 5);
-                 //std::cout << "RS " << RS << std::endl;
-                 //std::string RT = BINARY.substr(11, 5);
-                 //std::cout << "RT " << RT << std::endl;
-                 //std::string RD = BINARY.substr(16, 5);
-                 //std::cout << "RD " << RD << std::endl;
-                 //std::string SHAMT = BINARY.substr(21, 5);
-                 //std::cout << "SHAMT " << SHAMT << std::endl;
-                 //std::string FUNCT = BINARY.substr(26, 6);
-                 //std::cout << "FUNCT " << FUNCT << std::endl;
                  std::string MNEM = FIND_IN_MAP(BINARY.substr(26, 6), R_OPCODES);
-                 //std::cout << "MNEM " << MNEM << std::endl;
-                // std::string RS = FIND_IN_MAP(BINARY.substr(6, 5), REGISTERS);
-                // std::cout << "RS " << RS << std::endl;
                  std::string RT = FIND_IN_MAP(BINARY.substr(11, 5), REGISTERS);
-                 //std::cout << "RT " << RT << std::endl;
                  std::string RD = FIND_IN_MAP(BINARY.substr(16, 5), REGISTERS);
-                // std::cout << "RD " << RD << std::endl;
-                std::string SHAMT; std::string RS;
+                 std::string RS = FIND_IN_MAP(BINARY.substr(6, 5), REGISTERS);
                 if (MNEM == "srl" || MNEM == "sll") {
-                     SHAMT = BINARY.substr(21, 5);
-                     RS = "\b"; //backpace character for proper spacing
+                    std::bitset<8> bits(BINARY.substr(21, 5));
+                    std::string SHAMT = std::to_string(bits.to_ulong()); 
+                    INSTRUCTION = MNEM + " " + RD + ", "  + RT + ", " + SHAMT;
                 }
                 else {
-                     SHAMT = "";
-                     RS = FIND_IN_MAP(BINARY.substr(6, 5), REGISTERS);
+                     INSTRUCTION = MNEM + " " + RD + ", " + RS + ", " + RT;
                 }
-                // std::cout << "SHAMT " << SHAMT << std::endl;
-                 std::string R_INSTRUCTION = MNEM + " " + RD + " " + RS + " " + RT + " " + SHAMT;
-                 std::cout << R_INSTRUCTION << std::endl; 
-
-
+                std::cout << INSTRUCTION << std::endl; 
             }
-            else {
+            else { //else I-type instruction
                  std::cout << "I TYPE" << std::endl;
-                std::string OP = FIND_IN_MAP(OPCODE, I_OPCODES);
-                 //std::string RS = BINARY.substr(6, 5);
+                 std::string OP = FIND_IN_MAP(OPCODE, I_OPCODES);
                  std::string RS = FIND_IN_MAP(BINARY.substr(6, 5), REGISTERS);
-                 //std::cout << "RS " << RS << std::endl;
-                 //std::string RT = BINARY.substr(11, 5);
                  std::string RT = FIND_IN_MAP(BINARY.substr(11, 5), REGISTERS);
-                 //std::cout << "RT " << RT << std::endl;
                  std::string IMM = BINARY.substr(16, 16);
-                 //std::cout << "IMM " << IMM << std::endl;
-                 std::string I_INSTRUCTION = OP + " " + RS + " " + RT + " " + IMM;
-                 std::cout << I_INSTRUCTION << std::endl; 
-                 
+                
+                if(OP == "beq" || OP == "bne") {
+                    std::string IMMM;
+                    std::cout << "IMM: " << IMM << std::endl;
+                    if(IMM[0] == '1') {
+                        IMMM = "-" + twosCompliment(IMM);
+                    }
+                    else {
+                        std::bitset<16> bitset(IMM);
+                        int decimalValue = bitset.to_ulong();
+                        IMMM = std::to_string(decimalValue);
+                    }
+                    std::cout << "IMMM: " << IMMM << std::endl;
+                    int offset = std::stoi(IMM, nullptr, 16);
+                    std::cout << "OFFSET: " << offset << std::endl;
+                    int targetAddress = address + (offset * 4);
+                    std::cout << "TARGET ADDRESS: " << targetAddress << std::endl;
+
+
+
+                }
+                else if(OP == "lw" || OP == "sw") {
+                    std::bitset<16> bits(IMM);
+                    std::string decimal_IMM = std::to_string(bits.to_ulong());
+                    INSTRUCTION = OP + " " + RT + ", " + decimal_IMM + "(" + RS + ")"; 
+                }
+                else {
+                    std::bitset<16> bits(IMM);
+                    std::string decimal_IMM = std::to_string(bits.to_ulong());
+                     INSTRUCTION = OP + " " + RT + ", " + RS + ", " + decimal_IMM; 
+                }
+                 std::cout << INSTRUCTION << std::endl;     
             }
+            outfile << INSTRUCTION << std::endl; //add instruction to new line of .asm file
+            address += 4;
         }
         inputFile.close(); // close file
+        outfile.close();
     }
     else { 
         std::cout << "Error opening file." << std::endl;
@@ -123,3 +161,27 @@ std::string FIND_IN_MAP(std::string opcodeStr, std::map<std::string, std::string
     return "";
 
 }
+std::string twosCompliment(std::string binaryStr) {
+    for(std::size_t i = 0; i < binaryStr.length(); i++){
+         if (binaryStr[i] == '0') {
+            binaryStr[i] = '1';
+         } else {
+            binaryStr[i] = '0';
+         }
+    } //flip all of the bits 
+    bool carry = true;
+    for (int i = binaryStr.length() - 1; i >= 0; i--) {
+        if (binaryStr[i] == '0' && carry) {
+            binaryStr[i] = '1';
+            carry = false;
+        } else if (binaryStr[i] == '1' && carry) {
+            binaryStr[i] = '0';
+        }
+    }
+    
+    // convert binary number to string and return it
+    std::bitset<16> bitset(binaryStr);
+    int decimalValue = bitset.to_ulong();
+    return std::to_string(decimalValue);
+}
+
