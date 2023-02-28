@@ -4,6 +4,7 @@
 #include <sstream>
 #include <iomanip>
 #include "Project1.hpp"
+#pragma comment(linker, "/SUBSYSTEM:CONSOLE")
 
 std::string ConverttoBinary(std::string line);
 std::string addLeadingZeroes(std::string binaryStr);
@@ -32,8 +33,8 @@ int main() {
             BINARY = ConverttoBinary(line);
             std::string OPCODE = BINARY.substr(0, 6);
         if(line.length() != 8) {
-            std::cout << "Cannot disassemble " << line << " at line " << address-1 << std::endl;
-            exit(0);//if a line is not 8 characters in length, throw error and terminate program
+            std::cerr << "Cannot disassemble " << line << " at line " << address-1 << std::endl;
+            //exit(0);//if a line is not 8 characters in length, throw error and terminate program
         }
         if (OPCODE == "000100" || OPCODE == "000101"){ //if opcode = bne or beq
              std::string IMM = BINARY.substr(16, 16); //isolate immediate value (I-type)
@@ -110,9 +111,11 @@ int main() {
         outfile.close();  // close files
      }
     else {
-         std::cout << "Error opening file." << std::endl;
+         std::cerr << "Error opening file." << std::endl;
     }
-    std::cout << "SUCCESS" << std::endl;
+    std::cerr << "SUCCESS" << std::endl;
+   // std::cout << "Press enter to exit" << std::endl;
+    //std::cin.get();
      return 0;
 }
 
@@ -149,8 +152,8 @@ std::string FIND_IN_MAP(std::string opcodeStr, std::map<std::string, std::string
     std::string ADDRESS = std::to_string(address);
     std::string ERROR = "Cannot disassemble " + opcodeStr + " at line " + ADDRESS; // Opcode not found, print the opcode and return error message for outfile
     std::cout << ERROR << std::endl;
-    exit(0);
-    //return "";
+    //exit(0); //terminate program
+    return "";
 }
 std::string twosCompliment(std::string binaryStr) {
     for(std::size_t i = 0; i < binaryStr.length(); i++){
