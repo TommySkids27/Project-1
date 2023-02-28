@@ -1,53 +1,74 @@
 #include <iostream>
 #include <fstream>
 #include <bitset>
+#include <sstream>
+#include <iomanip>
 #include "Project1.hpp"
 
 std::string ConverttoBinary(std::string line);
 std::string addLeadingZeroes(std::string binaryStr);
 std::string FIND_IN_MAP(std::string opcodeStr, std::map<std::string, std::string> MAP);
 std::string twosCompliment(std::string binaryStr);
+std::string decimalToHex(unsigned int decimalValue);
 int main() {
-    //std::string FileName;
-    //std::cout << "Enter file name with suffix: " << std::endl;
-    //std::cin >> FileName;
-    //std::ifstream inputFile(FileName); // open file for reading
-    std::ifstream inputFile("test_case3.obj");
+    // std::string FileName;
+    // std::cout << "Enter file name with suffix: ";
+    // std::cin >> FileName;
+    // std::ifstream inputFile(FileName); // open file for reading
     std::ofstream outfile("proj1_skidmore.asm", std::ios::trunc);
+    std::ifstream inputFile("test_case3.obj");
     std::string line;
     std::string RTYPE = "000000";
     int address = 0;
-
-
     std::map<int, std::string> labels;
+  
      if (inputFile.is_open()) {
+        int address = 2; int target_address;
         while (std::getline(inputFile, line)) { // read line by line
         std::string BINARY; //std::string FINISH_HEX;
         BINARY = ConverttoBinary(line);
         std::string OPCODE = BINARY.substr(0, 6);
         if (OPCODE == "000100" || OPCODE == "000101"){
             std::string IMM = BINARY.substr(16, 16);
-            std::string B_OFFSET;
+            std::string OFFSET;
             if(IMM[0] == '1') {
-                B_OFFSET = "-" + twosCompliment(IMM);
+                //OFFSET = twosCompliment(IMM);
+                int offset = std::stoi(twosCompliment(IMM)); // convert string to integer
+                target_address = address - offset; //print label_line
+                std::cout << "LABEL L I N E: - " <<  target_address << std::endl;
             }
             else {
                 std::bitset<16> bitset(IMM);
-                int decimalValue = bitset.to_ulong();
-                B_OFFSET = std::to_string(decimalValue);
+                int offset = bitset.to_ulong();
+                target_address = address + offset;
+                std::cout << "LABEL L I N E: add " <<  target_address << std::endl;
+                //OFFSET = std::to_string(decimalValue); //converting string representsing binary value into a signed integer
             }
-            std::cout << " h hi di: " << B_OFFSET << std::endl;
+            std::string address_label = "Addr_" + decimalToHex((target_address-1) * 4) + ":";
+            std::string TARGET_ADDRESS = std::to_string(target_address);
+            std::cout << "add label " << address_label << std::endl; //name of label
+            std::cout << "target addreess " << TARGET_ADDRESS << std::endl; //name of l
+            labels[target_address] = address_label;
         }
-        
-        } inputFile.close();
+        address++;
+        }
+    } 
+    else {
+         std::cout << "Error opening file." << std::endl;
     }
-
-
-
     inputFile.open("test_case3.obj");
     if (inputFile.is_open()) {
+         int address = 1;
+         std::cout << "HEEHHEHEHEH" << std::endl;
         while (std::getline(inputFile, line)) { // read line by line
            //std::cout << "FILELINE " << line << std::endl; // print line
+            std::map<int, std::string>::iterator it;
+            for (it = labels.begin(); it != labels.end(); ++it) {
+            std::cout << it->first << ": " << it->second << std::endl;
+                if (it->first == address) {
+                    outfile << it->second << std::endl;
+                 }
+            }
             std::string BINARY; //std::string FINISH_HEX;
             BINARY = ConverttoBinary(line);
            // std::cout << "Converted binary value: " << BINARY << std::endl;
@@ -63,10 +84,10 @@ int main() {
                 if (MNEM == "srl" || MNEM == "sll") {
                     std::bitset<8> bits(BINARY.substr(21, 5));
                     std::string SHAMT = std::to_string(bits.to_ulong()); 
-                    INSTRUCTION = MNEM + " " + RD + ", "  + RT + ", " + SHAMT;
+                    INSTRUCTION = "\t" + MNEM + " " + RD + ", "  + RT + ", " + SHAMT;
                 }
                 else {
-                     INSTRUCTION = MNEM + " " + RD + ", " + RS + ", " + RT;
+                     INSTRUCTION = "\t" + MNEM + " " + RD + ", " + RS + ", " + RT;
                 }
                 std::cout << INSTRUCTION << std::endl; 
             }
@@ -77,40 +98,20 @@ int main() {
                  std::string RT = FIND_IN_MAP(BINARY.substr(11, 5), REGISTERS);
                  std::string IMM = BINARY.substr(16, 16);
                 
-                if(OP == "beq" || OP == "bne") {
-                    std::string IMMM;
-                    std::cout << "IMM: " << IMM << std::endl;
-                    if(IMM[0] == '1') {
-                        IMMM = "-" + twosCompliment(IMM);
-                    }
-                    else {
-                        std::bitset<16> bitset(IMM);
-                        int decimalValue = bitset.to_ulong();
-                        IMMM = std::to_string(decimalValue);
-                    }
-                    std::cout << "IMMM: " << IMMM << std::endl;
-                    int offset = std::stoi(IMM, nullptr, 16);
-                    std::cout << "OFFSET: " << offset << std::endl;
-                    int targetAddress = address + (offset * 4);
-                    std::cout << "TARGET ADDRESS: " << targetAddress << std::endl;
-
-
-
-                }
-                else if(OP == "lw" || OP == "sw") {
+                 if(OP == "lw" || OP == "sw") {
                     std::bitset<16> bits(IMM);
                     std::string decimal_IMM = std::to_string(bits.to_ulong());
-                    INSTRUCTION = OP + " " + RT + ", " + decimal_IMM + "(" + RS + ")"; 
+                    INSTRUCTION = "\t" + OP + " " + RT + ", " + decimal_IMM + "(" + RS + ")"; 
                 }
                 else {
                     std::bitset<16> bits(IMM);
                     std::string decimal_IMM = std::to_string(bits.to_ulong());
-                     INSTRUCTION = OP + " " + RT + ", " + RS + ", " + decimal_IMM; 
+                     INSTRUCTION = "\t" + OP + " " + RT + ", " + RS + ", " + decimal_IMM; 
                 }
                  std::cout << INSTRUCTION << std::endl;     
             }
             outfile << INSTRUCTION << std::endl; //add instruction to new line of .asm file
-            address += 4;
+            address++;
         }
         inputFile.close(); // close file
         outfile.close();
@@ -185,3 +186,8 @@ std::string twosCompliment(std::string binaryStr) {
     return std::to_string(decimalValue);
 }
 
+std::string decimalToHex(unsigned int decimalValue) {
+    std::stringstream ss;
+    ss << std::hex << std::setw(4) << std::setfill('0') << decimalValue;
+    return ss.str();
+}
