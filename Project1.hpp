@@ -67,3 +67,4 @@ std::map<std::string, std::string> REGISTERS = {
     {"$fp", "11110"},
     {"$ra", "11111"},
 };
+std::map<int, std::string> labels;
