@@ -1,7 +1,7 @@
 #include <map>
 #include <string>
 
-std::map<std::string, std::string> R_OPCODES = { //map opcode, funct
+std::map<std::string, std::string> R_FUNCT = {
       {"add", "100000"},
       {"addu", "100001"},
       {"and", "100100"},
@@ -14,7 +14,7 @@ std::map<std::string, std::string> R_OPCODES = { //map opcode, funct
       {"srl", "000010"},
       {"sub", "100010"},
       {"subu", "100011"},
-};
+}; //All R-type functions
 std::map<std::string, std::string> I_OPCODES = { //map opcode, funct
       {"addi", "001000"},
       {"addiu", "001001"},
@@ -32,7 +32,7 @@ std::map<std::string, std::string> I_OPCODES = { //map opcode, funct
       {"sc", "111000"},
       {"sh", "101001"},
       {"sw", "101011"},
-};
+}; //MIPS core instruction I-type Mnemonics and opcodes
 std::map<std::string, std::string> REGISTERS = {
     {"$zero", "00000"},
     {"$at", "00001"},
@@ -66,5 +66,5 @@ std::map<std::string, std::string> REGISTERS = {
     {"$sp", "11101"},
     {"$fp", "11110"},
     {"$ra", "11111"},
-};
-std::map<int, std::string> labels;
+}; //map for containing register names and there respective binary values
+std::map<int, std::string> labels; //map for storing labels

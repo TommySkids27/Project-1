@@ -7,7 +7,7 @@
 
 std::string ConverttoBinary(std::string line);
 std::string addLeadingZeroes(std::string binaryStr);
-std::string FIND_IN_MAP(std::string opcodeStr, std::map<std::string, std::string> MAP);
+std::string FIND_IN_MAP(std::string opcodeStr, std::map<std::string, std::string> MAP, int address);
 std::string twosCompliment(std::string binaryStr);
 std::string decimalToHex(unsigned int decimalValue);
 void GENERATE_LABEL(int address, std::string IMM);
@@ -31,11 +31,15 @@ int main() {
             std::string BINARY; //std::string FINISH_HEX;
             BINARY = ConverttoBinary(line);
             std::string OPCODE = BINARY.substr(0, 6);
-        if (OPCODE == "000100" || OPCODE == "000101"){
-             std::string IMM = BINARY.substr(16, 16);
-             GENERATE_LABEL(address, IMM);
+        if(line.length() != 8) {
+            std::cout << "Cannot disassemble " << line << " at line " << address-1 << std::endl;
+            exit(0);//if a line is not 8 characters in length, throw error and terminate program
         }
-        address++;
+        if (OPCODE == "000100" || OPCODE == "000101"){ //if opcode = bne or beq
+             std::string IMM = BINARY.substr(16, 16); //isolate immediate value (I-type)
+             GENERATE_LABEL(address, IMM); //generate the label and store in label map
+        }
+        address++; //increment address for every new line
         }
         inputFile.clear(); //clear end of file flag
         inputFile.seekg(0, std::ios::beg);// set the position of the file pointer back to the beginning of the file
@@ -54,10 +58,10 @@ int main() {
             std::string OPCODE = BINARY.substr(0, 6);
             std::string INSTRUCTION;
              if(OPCODE == RTYPE) {
-                 std::string MNEM = FIND_IN_MAP(BINARY.substr(26, 6), R_OPCODES);
-                 std::string RT = FIND_IN_MAP(BINARY.substr(11, 5), REGISTERS);
-                 std::string RD = FIND_IN_MAP(BINARY.substr(16, 5), REGISTERS);
-                 std::string RS = FIND_IN_MAP(BINARY.substr(6, 5), REGISTERS);
+                 std::string MNEM = FIND_IN_MAP(BINARY.substr(26, 6), R_FUNCT, address);
+                 std::string RT = FIND_IN_MAP(BINARY.substr(11, 5), REGISTERS, address);
+                 std::string RD = FIND_IN_MAP(BINARY.substr(16, 5), REGISTERS, address);
+                 std::string RS = FIND_IN_MAP(BINARY.substr(6, 5), REGISTERS, address);
             
                  if (MNEM == "srl" || MNEM == "sll") {
                     std::bitset<8> bits(BINARY.substr(21, 5));
@@ -69,9 +73,9 @@ int main() {
                 }
             }
             else { //else I-type instruction
-                 std::string OP = FIND_IN_MAP(OPCODE, I_OPCODES);
-                 std::string RS = FIND_IN_MAP(BINARY.substr(6, 5), REGISTERS);
-                 std::string RT = FIND_IN_MAP(BINARY.substr(11, 5), REGISTERS);
+                 std::string OP = FIND_IN_MAP(OPCODE, I_OPCODES, address);
+                 std::string RS = FIND_IN_MAP(BINARY.substr(6, 5), REGISTERS, address);
+                 std::string RT = FIND_IN_MAP(BINARY.substr(11, 5), REGISTERS, address);
                  std::string IMM = BINARY.substr(16, 16); 
                 if(OP == "lw" || OP == "sw") {
                     std::bitset<16> bits(IMM);
@@ -82,30 +86,28 @@ int main() {
                     std::string LABEL; std::string OFFSET;
                     int target_address;
                     if(IMM[0] == '1') {
-                            //OFFSET = twosCompliment(IMM);
-                            int offset = std::stoi(twosCompliment(IMM)); // convert string to integer
-                            target_address = address - offset; //print label_line
+                            int offset = std::stoi(twosCompliment(IMM)); // convert 2-compliment string to integer
+                            target_address = address - offset; //the target address to place the label
                     }
                      else {
-                             std::bitset<16> bitset(IMM);
+                             std::bitset<16> bitset(IMM); //2-compliment conversion is not required
                              int offset = bitset.to_ulong();
-                             target_address = address + offset;
-                            //OFFSET = std::to_string(decimalValue); //converting string representsing binary value into a signed integer
+                             target_address = address + offset; //add the postive offset to current address
                         }
-                    std::string address_label = "Addr_" + decimalToHex((target_address) * 4);
-                    INSTRUCTION = "\t" + OP + " " + RT + ", " + RS + ", " + address_label; 
-            }
+                    std::string address_label = "Addr_" + decimalToHex((target_address) * 4); //create addr header
+                    INSTRUCTION = "\t" + OP + " " + RT + ", " + RS + ", " + address_label; //print instruction
+                }
                 else {
                     std::bitset<16> bits(IMM);
                     std::string decimal_IMM = std::to_string(bits.to_ulong());
-                     INSTRUCTION = "\t" + OP + " " + RT + ", " + RS + ", " + decimal_IMM; 
+                     INSTRUCTION = "\t" + OP + " " + RT + ", " + RS + ", " + decimal_IMM; //ptherwise "normal" I-type format
                 }     
             }
             outfile << INSTRUCTION << std::endl; //add instruction to new line of .asm file
-            address++;
+            address++; //increment address each line
         }
-        inputFile.close(); // close file
-        outfile.close();  
+        inputFile.close(); 
+        outfile.close();  // close files
      }
     else {
          std::cout << "Error opening file." << std::endl;
@@ -135,7 +137,7 @@ std::string addLeadingZeroes(std::string binaryStr) {
     return leadingZeroes + binaryStr;  // Concatenate the two strings   
 }
 
-std::string FIND_IN_MAP(std::string opcodeStr, std::map<std::string, std::string> MAP) {
+std::string FIND_IN_MAP(std::string opcodeStr, std::map<std::string, std::string> MAP, int address) {
     
     // Iterate over the map and look for the opcode
     std::map<std::string, std::string>::iterator it;
@@ -144,8 +146,11 @@ std::string FIND_IN_MAP(std::string opcodeStr, std::map<std::string, std::string
         return it->first;
         }
     }
-    std::string ERROR = "ERROR: " + opcodeStr + " is not a valid opcode or funct or label."; // Opcode not found, print the opcode and return error message for outfile
-    return ERROR;
+    std::string ADDRESS = std::to_string(address);
+    std::string ERROR = "Cannot disassemble " + opcodeStr + " at line " + ADDRESS; // Opcode not found, print the opcode and return error message for outfile
+    std::cout << ERROR << std::endl;
+    exit(0);
+    //return "";
 }
 std::string twosCompliment(std::string binaryStr) {
     for(std::size_t i = 0; i < binaryStr.length(); i++){
@@ -174,7 +179,7 @@ std::string twosCompliment(std::string binaryStr) {
 std::string decimalToHex(unsigned int decimalValue) {
     std::stringstream ss;
     ss << std::hex << std::setw(4) << std::setfill('0') << decimalValue;
-    return ss.str();
+    return ss.str(); //converts an unsigned int into a hex representation of that value as a string (for addr_label)
 }
 void GENERATE_LABEL(int address, std::string IMM) {
             std::string OFFSET;
@@ -190,6 +195,6 @@ void GENERATE_LABEL(int address, std::string IMM) {
             }
             std::string address_label = "Addr_" + decimalToHex((target_address-1) * 4) + ":";
             std::string TARGET_ADDRESS = std::to_string(target_address);
-            labels[target_address] = address_label;
+            labels[target_address] = address_label; //generates the label and stores the address_label with the line it needs to be printed on
 }
         

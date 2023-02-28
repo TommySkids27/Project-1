@@ -1,0 +1,14 @@
+Instruction for MIPS Disassembler:
+
+1. After unzipping "Project1_skidmore", open up "Project1.cpp" using your preferred C++ IDE or terminal.
+2. Compile (run) the file "Project1.cpp".
+3. The command window should appear, asking the user to input the text file name.
+4. "Project1_skidmore" contains the four test cases provided: 
+	test_case1.obj
+	test_case2.obj
+	test_case3.obj
+	test_case4.obj
+Enter one of these into the command window, or upload your own text file into the Project 1 folder and type in that file name exactly
+5. Check the proj1_skidmore.asm for the instructions.
+6. Errors can result if improper hexadecimal instructions are included in the .obj file or if the program cannot locate the file.
+Also, ensure that there are no blank lines in the .obj file otherwise, there will be no output. 
