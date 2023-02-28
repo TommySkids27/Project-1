@@ -10,65 +10,50 @@ std::string addLeadingZeroes(std::string binaryStr);
 std::string FIND_IN_MAP(std::string opcodeStr, std::map<std::string, std::string> MAP);
 std::string twosCompliment(std::string binaryStr);
 std::string decimalToHex(unsigned int decimalValue);
+void GENERATE_LABEL(int address, std::string IMM);
+
+bool ERROR = false; //error flag
+
 int main() {
     // std::string FileName;
     // std::cout << "Enter file name with suffix: ";
     // std::cin >> FileName;
     // std::ifstream inputFile(FileName); // open file for reading
     std::ofstream outfile("proj1_skidmore.asm", std::ios::trunc);
-    std::ifstream inputFile("test_case3.obj");
+    std::ifstream inputFile("test_case4.obj");
     std::string line;
     std::string RTYPE = "000000";
     int address = 0;
-    std::map<int, std::string> labels;
   
      if (inputFile.is_open()) {
-        int address = 2; int target_address;
+        address = 2; 
         while (std::getline(inputFile, line)) { // read line by line
-        std::string BINARY; //std::string FINISH_HEX;
-        BINARY = ConverttoBinary(line);
-        std::string OPCODE = BINARY.substr(0, 6);
+            std::cout << "line" << line << std::endl;
+            std::string BINARY; //std::string FINISH_HEX;
+            BINARY = ConverttoBinary(line);
+            std::string OPCODE = BINARY.substr(0, 6);
         if (OPCODE == "000100" || OPCODE == "000101"){
-            std::string IMM = BINARY.substr(16, 16);
-            std::string OFFSET;
-            if(IMM[0] == '1') {
-                //OFFSET = twosCompliment(IMM);
-                int offset = std::stoi(twosCompliment(IMM)); // convert string to integer
-                target_address = address - offset; //print label_line
-                std::cout << "LABEL L I N E: - " <<  target_address << std::endl;
-            }
-            else {
-                std::bitset<16> bitset(IMM);
-                int offset = bitset.to_ulong();
-                target_address = address + offset;
-                std::cout << "LABEL L I N E: add " <<  target_address << std::endl;
-                //OFFSET = std::to_string(decimalValue); //converting string representsing binary value into a signed integer
-            }
-            std::string address_label = "Addr_" + decimalToHex((target_address-1) * 4) + ":";
-            std::string TARGET_ADDRESS = std::to_string(target_address);
-            std::cout << "add label " << address_label << std::endl; //name of label
-            std::cout << "target addreess " << TARGET_ADDRESS << std::endl; //name of l
-            labels[target_address] = address_label;
+             std::string IMM = BINARY.substr(16, 16);
+             GENERATE_LABEL(address, IMM);
         }
         address++;
+        std::cout << "address" << address << std::endl;
         }
-    } 
-    else {
-         std::cout << "Error opening file." << std::endl;
-    }
-    inputFile.open("test_case3.obj");
-    if (inputFile.is_open()) {
-         int address = 1;
-         std::cout << "HEEHHEHEHEH" << std::endl;
+         std::cout << "PAST CLEASR" << std::endl;
+        inputFile.clear();// set the position of the file pointer back to the beginning of the file
+        inputFile.seekg(0, std::ios::beg);
+        address = 1;
         while (std::getline(inputFile, line)) { // read line by line
            //std::cout << "FILELINE " << line << std::endl; // print line
+           if (!labels.empty()) {
             std::map<int, std::string>::iterator it;
             for (it = labels.begin(); it != labels.end(); ++it) {
-            std::cout << it->first << ": " << it->second << std::endl;
+            //std::cout << it->first << ": " << it->second << std::endl;
                 if (it->first == address) {
                     outfile << it->second << std::endl;
                  }
             }
+           }
             std::string BINARY; //std::string FINISH_HEX;
             BINARY = ConverttoBinary(line);
            // std::cout << "Converted binary value: " << BINARY << std::endl;
@@ -103,6 +88,15 @@ int main() {
                     std::string decimal_IMM = std::to_string(bits.to_ulong());
                     INSTRUCTION = "\t" + OP + " " + RT + ", " + decimal_IMM + "(" + RS + ")"; 
                 }
+                // else if(OP == "bne" || OP == "beq") {
+                //     std::map<int, std::string>::iterator it;
+                //     for (it = labels.begin(); it != labels.end(); ++it) {
+                //     if (it->first == address) {
+                //     outfile << it->second << std::endl;
+                //  }
+            //}
+                     //INSTRUCTION = "\t" + OP + " " + RT + ", " + RS + ", " + ; 
+                //}
                 else {
                     std::bitset<16> bits(IMM);
                     std::string decimal_IMM = std::to_string(bits.to_ulong());
@@ -115,10 +109,19 @@ int main() {
         }
         inputFile.close(); // close file
         outfile.close();
+    //}
+   // else { 
+    //    std::cout << "Error opening file." << std::endl;
+    //}
+    
+     }
+    else {
+         std::cout << "Error opening file." << std::endl;
     }
-    else { 
-        std::cout << "Error opening file." << std::endl;
-    }
+
+
+    //inputFile.open("test_case2.obj");
+    //if (inputFile.is_open()) {
     return 0;
 }
 
@@ -157,10 +160,9 @@ std::string FIND_IN_MAP(std::string opcodeStr, std::map<std::string, std::string
         return it->first;
     }
 }
+    std::string ERROR = "ERROR: " + opcodeStr + " is not a valid opcode or funct or label.";
     // Opcode not found, print the opcode and return an empty string
-    std::cout << "String not found: " << opcodeStr << std::endl;
-    return "";
-
+    return ERROR;
 }
 std::string twosCompliment(std::string binaryStr) {
     for(std::size_t i = 0; i < binaryStr.length(); i++){
@@ -191,3 +193,26 @@ std::string decimalToHex(unsigned int decimalValue) {
     ss << std::hex << std::setw(4) << std::setfill('0') << decimalValue;
     return ss.str();
 }
+void GENERATE_LABEL(int address, std::string IMM) {
+            std::string OFFSET;
+            int target_address;
+            if(IMM[0] == '1') {
+                //OFFSET = twosCompliment(IMM);
+                int offset = std::stoi(twosCompliment(IMM)); // convert string to integer
+                target_address = address - offset; //print label_line
+                std::cout << "LABEL L I N E: - " <<  target_address << std::endl;
+            }
+            else {
+                std::bitset<16> bitset(IMM);
+                int offset = bitset.to_ulong();
+                target_address = address + offset;
+                std::cout << "LABEL L I N E: add " <<  target_address << std::endl;
+                //OFFSET = std::to_string(decimalValue); //converting string representsing binary value into a signed integer
+            }
+            std::string address_label = "Addr_" + decimalToHex((target_address-1) * 4) + ":";
+            std::string TARGET_ADDRESS = std::to_string(target_address);
+            std::cout << "add label " << address_label << std::endl; //name of label
+            std::cout << "target addreess " << TARGET_ADDRESS << std::endl; //name of l
+            labels[target_address] = address_label;
+}
+        
